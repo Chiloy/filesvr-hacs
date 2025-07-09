@@ -1,2 +1,2 @@
 # filesvr-hacs
-SFTP and FTP High Availability Cluster.
+SFTP and FTP high availability cluster management system.
