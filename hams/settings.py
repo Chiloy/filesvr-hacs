@@ -14,7 +14,6 @@ from pathlib import Path
 import os
 import sys
 
-from sympy import false
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -84,13 +83,17 @@ WSGI_APPLICATION = 'hams.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
+    'defaultss': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'fshams',
         'USER': 'pamuser',
         'PASSWORD': 'Dbuser@0531',
         'HOST': '10.18.32.85',
         'PORT': '3306'
+    },
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
