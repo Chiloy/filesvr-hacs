@@ -9,7 +9,7 @@ class DbEncrypt(Func):
 
 
 # Create pam_mysql models.
-# incloud users、groups、grouplist、log
+# includes users、groups、grouplist、log
 # https://github.com/NigelCunningham/pam-MySQL/blob/master/examples/users.sql
 class PamUsers(models.Model):
     username = models.CharField(max_length=50, null=False, blank=False)
@@ -68,7 +68,7 @@ class PamGroups(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.pk:
-            last_gid = groups.objects.order_by('gid').first()
+            last_gid = PamGroups.objects.order_by('gid').first()
             self.gid = last_gid.gid + 1 if last_gid else 5000
 
     class Meta:
