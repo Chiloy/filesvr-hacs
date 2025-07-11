@@ -11,8 +11,21 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+from dotenv import load_dotenv
 import os
 import sys
+
+
+# Load environment variables from .env file
+load_dotenv()
+# Access environment envirables
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
+DEBUG = os.getenv("DJANGO_DEBUG")
+DATABASE_HOST = os.getenv("DJANGO_DATABASE_HOST")
+DATABASE_PORT = os.getenv("DJANGO_DATABASE_PORT")
+DATABASE_NAME = os.getenv("DJANGO_DATABASE_NAME")
+DATABASE_USER = os.getenv("DJANGO_DATABASE_USER")
+DATABASE_PASSWORD = os.getenv("DJANGO_DATABASE_PASSWORD")
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -22,12 +35,6 @@ sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-wbyhrw)%tblx9zzq*fa+n4co_itzn&=rf%$7!gcl6bfq18g76t'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -83,15 +90,15 @@ WSGI_APPLICATION = 'hams.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-    'defaultss': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'fshams',
-        'USER': 'pamuser',
-        'PASSWORD': 'Dbuser@0531',
-        'HOST': '10.18.32.85',
-        'PORT': '3306'
-    },
     'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': DATABASE_NAME,
+        'USER': DATABASE_USER,
+        'PASSWORD': DATABASE_PASSWORD,
+        'HOST': DATABASE_HOST,
+        'PORT': DATABASE_PORT
+    },
+    'defaultss': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
