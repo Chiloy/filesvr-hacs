@@ -1,8 +1,14 @@
 from django.db import models
 from django.db.models import Func, Value
-from django import forms
-from sympy import false
+from django.dispatch import receiver
+from dotenv import load_dotenv
+import os
 
+from zeroconf import instance_name_from_service_info
+
+# Load environment variables from .env file
+load_dotenv()
+FAHACS_FILE_ROOT_DIR = os.getenv('FAHACS_FILE_ROOT_DIR')
 
 class DbEncrypt(Func):
     function = 'ENCRYPT'
@@ -42,7 +48,8 @@ class PamUsers(models.Model):
     status = models.CharField(max_length=1, null=False, blank=True, default='N')
     uid = models.IntegerField(null=False, blank=False)
     # gid = models.IntegerField(null=False, blank=False, default=5000)
-    gid = models.ForeignKey(PamGroups, on_delete=models.CASCADE, null=False, blank=False, db_column='gid')
+    gid = models.ForeignKey(PamGroups, on_delete=models.CASCADE, null=False, blank=False,
+                            db_column='gid', verbose_name='Group')
     gecos = models.CharField(max_length=128, null=True, blank=True)
     homedir = models.CharField(max_length=32, null=True, blank=True)
     lstchg = models.IntegerField(null=False, blank=True, default=-1)
@@ -54,6 +61,7 @@ class PamUsers(models.Model):
     flag = models.IntegerField(null=False, blank=True, default=-1)
 
     def save(self, *args, **kwargs):
+        self.homedir = os.path.join(FAHACS_FILE_ROOT_DIR, str(self.gid), self.username)
         self.password = DbEncrypt(Value('password'))
         super(PamUsers, self).save(*args, **kwargs)
 
@@ -69,9 +77,7 @@ class PamUsers(models.Model):
     def __str__(self):
         return self.username
 
-class GroupLists(models.Model):
-    # username = models.CharField(max_length=50, null=False, blank=False, primary_key=True)
-    # gid = models.IntegerField(null=False, blank=False, default=0)
+class PamGroupLists(models.Model):
     username = models.OneToOneField(PamUsers, on_delete=models.CASCADE, db_column='username',
                                  primary_key=True)
     gid = models.ForeignKey(PamGroups, on_delete=models.CASCADE, db_column='gid')
@@ -113,3 +119,18 @@ class PamLog(models.Model):
 
     class Meta:
         db_table = 'log'
+
+@receiver (models.signals.post_save, sender=PamUsers)
+def create_pam_user(sender, instance, created, **kwargs):
+    if created:
+        print(instance)
+        #pam_grp_list_inst = PamGroupLists.objects.create(username=username, gid=self.gid)
+        #pam_grp_list_inst.save()
+
+@receiver (models.signals.post_save, sender=SftpPamUser)
+def create_pam_user(sender, instance, created, **kwargs):
+    if created:
+        # if table column had foreignKey need instance.
+        grp_instance = PamGroups.objects.filter(name=instance.gid).first()
+        user_instance = PamUsers.objects.filter(username=instance.username).first()
+        PamGroupLists.objects.create(username=user_instance, gid=grp_instance).save()

@@ -7,7 +7,7 @@ from .models import PamUsers
 class PamUserForm(forms.ModelForm):
     class Meta:
         model = PamUsers
-        fields = ['username', 'password', 'uid', 'gid', 'homedir']
+        fields = ['username', 'password', 'uid', 'gid']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
