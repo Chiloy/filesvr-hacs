@@ -26,6 +26,7 @@ class PamGroups(models.Model):
 
     def __str__(self):
         return self.name
+
     '''
     Default set gid 5000 and autoincrement.
     
@@ -39,6 +40,7 @@ class PamGroups(models.Model):
         db_table = 'groups'
         verbose_name = 'Pam Groups'
         verbose_name_plural = verbose_name
+
 
 class PamUsers(models.Model):
     username = models.CharField(max_length=50, null=False, blank=False, primary_key=True, unique=True)
@@ -77,9 +79,10 @@ class PamUsers(models.Model):
     def __str__(self):
         return self.username
 
+
 class PamGroupLists(models.Model):
     username = models.OneToOneField(PamUsers, on_delete=models.CASCADE, db_column='username',
-                                 primary_key=True)
+                                    primary_key=True)
     gid = models.ForeignKey(PamGroups, on_delete=models.CASCADE, db_column='gid')
 
     def __str__(self):
@@ -87,7 +90,8 @@ class PamGroupLists(models.Model):
 
     class Meta:
         db_table = 'grouplists'
-        verbose_name = 'Group Lists'
+        verbose_name = 'Group Member'
+        verbose_name_plural = verbose_name
         constraints = [
             models.UniqueConstraint(
                 fields=['username', 'gid'], name='unique_grouplists_username_gid'
@@ -108,6 +112,7 @@ class FtpPamUser(PamUsers):
         verbose_name = 'FTP User'
         verbose_name_plural = verbose_name
 
+
 class PamLog(models.Model):
     logid = models.AutoField(primary_key=True)
     time = models.DateTimeField(null=False, blank=True, auto_now=True)
@@ -119,18 +124,3 @@ class PamLog(models.Model):
 
     class Meta:
         db_table = 'log'
-
-@receiver (models.signals.post_save, sender=PamUsers)
-def create_pam_user(sender, instance, created, **kwargs):
-    if created:
-        print(instance)
-        #pam_grp_list_inst = PamGroupLists.objects.create(username=username, gid=self.gid)
-        #pam_grp_list_inst.save()
-
-@receiver (models.signals.post_save, sender=SftpPamUser)
-def create_pam_user(sender, instance, created, **kwargs):
-    if created:
-        # if table column had foreignKey need instance.
-        grp_instance = PamGroups.objects.filter(name=instance.gid).first()
-        user_instance = PamUsers.objects.filter(username=instance.username).first()
-        PamGroupLists.objects.create(username=user_instance, gid=grp_instance).save()
